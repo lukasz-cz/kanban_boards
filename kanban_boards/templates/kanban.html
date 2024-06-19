@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>Task Board</h2>
+    <table class="table table-bordered table-responsive" style="table-layout: fixed; word-wrap: break-word;">
+        <thead>
+            <tr>
+                <th>Backlog</th>
+                <th>Waiting</th>
+                <th>Working</th>
+                <th>Done</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td id="backlog" class="task-column">
+                    {% for i in user_tasks.backlog %}
+                        <div id="item_{{ loop.index }}" class="task-item px-2 py-4 mb-2 border rounded" data-content="{{ i }}">{{ i }} <button class="btn btn-danger btn-sm delete-btn float-end">-</button></div>
+                    {% endfor %}
+                </td>
+                <td id="waiting" class="task-column">
+                    {% for i in user_tasks.waiting %}
+                        <div id="item_{{ loop.index }}" class="task-item px-2 py-4 mb-2 border rounded" data-content="{{ i }}">{{ i }} <button class="btn btn-danger btn-sm delete-btn float-end">-</button></div>
+                    {% endfor %}
+                </td>
+                <td id="working" class="task-column">
+                    {% for i in user_tasks.working %}
+                        <div id="item_{{ loop.index }}" class="task-item px-2 py-4 mb-2 border rounded" data-content="{{ i }}">{{ i }} <button class="btn btn-danger btn-sm delete-btn float-end">-</button></div>
+                    {% endfor %}
+                </td>
+                <td id="done" class="task-column">
+                    {% for i in user_tasks.done %}
+                        <div id="item_{{ loop.index }}" class="task-item px-2 py-4 mb-2 border rounded" data-content="{{ i }}">{{ i }} <button class="btn btn-danger btn-sm delete-btn float-end">-</button></div>
+                    {% endfor %}
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <button id="add-item-btn" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addItemModal">Add Item</button>
+</div>
+
+<div class="modal fade" id="addItemModal" tabindex="-1" aria-labelledby="addItemModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addItemModalLabel">Add New Item</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="add-item-form">
+                    <div class="form-group">
+                        <label for="item-name">Item Name</label>
+                        <input type="text" class="form-control" id="item-name" placeholder="Enter item name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="item-category">Category</label>
+                        <select class="form-control" id="item-category">
+                            <option value="backlog">Backlog</option>
+                            <option value="waiting">Waiting</option>
+                            <option value="working">Working</option>
+                            <option value="done">Done</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Add Item</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="static/js/jquery-3.7.1.min.js"></script>
+<script src="static/js/jquery-ui.min.js"></script>
+<script src="static/js/popper.min.js"></script>
+<script src="static/js/bootstrap.min.js"></script>
+<script>
+    $(function() {
+        let itemCount = {{ user_tasks.backlog|length + user_tasks.waiting|length + user_tasks.working|length + user_tasks.done|length }};
+
+        $('.task-column').sortable({
+            connectWith: '.task-column',
+            update: function(event, ui) {
+                updateTasks();
+            }
+        }).disableSelection();
+
+        $('#add-item-form').on('submit', function(event) {
+            event.preventDefault();
+            const itemName = $('#item-name').val().trim();
+            const itemCategory = $('#item-category').val();
+            if (itemName && itemCategory) {
+                itemCount++;
+                const newItem = `<div id=\"item_${itemCount}\" class=\"task-item px-2 py-4 mb-2 border rounded\" data-content=\"${itemName}\">${itemName} <button class=\"btn btn-danger btn-sm delete-btn float-end\">-</button></div>`;
+                $(`#${itemCategory}`).append(newItem);
+                $('#addItemModal').modal('hide');
+                updateTasks();
+            }
+        });
+
+        $('body').on('click', '.delete-btn', function() {
+            $(this).closest('.task-item').remove();
+            updateTasks();
+        });
+
+        function updateTasks() {
+            const backlogTasks = $('#backlog').sortable('toArray', { attribute: 'data-content' });
+            const waitingTasks = $('#waiting').sortable('toArray', { attribute: 'data-content' });
+            const workingTasks = $('#working').sortable('toArray', { attribute: 'data-content' });
+            const doneTasks = $('#done').sortable('toArray', { attribute: 'data-content' });
+
+            const tasks = {
+                backlog: backlogTasks,
+                waiting: waitingTasks,
+                working: workingTasks,
+                done: doneTasks
+            };
+
+            $.ajax({
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(tasks),
+                dataType: 'json',
+                url: '/update_tasks',
+                success: function(response) {
+                    console.log(response.message);
+                },
+                error: function(xhr, status, error) {
+                    console.error('Failed to update tasks:', error);
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,2 @@
+SECRET_KEY: "example_secret_key"
+MONGO_URI: "mongodb://example_user:example_password@localhost:27017/example_db?authSource=example_auth_db&authMechanism=SCRAM-SHA-256"
