@@ -1,6 +1,6 @@
 # Kanban Boards
 
-Flask application for Kanban boards management.
+Flask application for Kanban tasks management.
 
 ## Features
 
@@ -17,6 +17,7 @@ Flask application for Kanban boards management.
 - Flask-Login
 - Flask-Argon2
 - PyYAML
+- MongoDB
 
 ## Install on Linux
 
@@ -48,22 +49,22 @@ Flask application for Kanban boards management.
 
 5. Set the `FLASK_CONFIG` environment variable:
     ```bash
-    export FLASK_CONFIG=production
+    export FLASK_CONFIG=local
     ```
 
 ## Run the App
 
 1. Run the application:
     ```bash
-    python3 run.py
+    python3 app.py
     ```
 
-2. Open your web browser and navigate to `http://127.0.0.1:5000`.
+2. Open your web browser and navigate to `http://127.0.0.1:5000`
 
 ## Usage
 
 - Sign up, log in and manage your tasks using the drag-and-drop interface.
-- Update your profile, reset your password, or delete your account from the profile page.
+- Update your profile, reset your password or delete your account from the profile page.
 
 ## License
 
