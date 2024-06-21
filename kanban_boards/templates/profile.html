@@ -23,8 +23,9 @@
                         <div class="mb-3">
                             <label for="new_password" class="form-label">New Password</label>
                             <input type="password" class="form-control" id="new_password" name="new_password" required>
+                            <div id="password-strength" class="mt-2"></div>
                         </div>
-                        <button type="submit" class="btn btn-primary">Reset Password</button>
+                        <button type="submit" class="btn btn-primary" id="reset" disabled>Reset Password</button>
                     </form>
                 </div>
             </div>
@@ -62,4 +63,44 @@
 </div>
 
 <script src="static/js/bootstrap.bundle.min.js"></script>
+<script src="static/js/jquery-3.7.1.min.js"></script>
+<script>
+    $(document).ready(function () {
+        $('#new_password').on('input', function () {
+            const strength = measurePasswordStrength($(this).val());
+            displayStrength(strength);
+        });
+
+        function measurePasswordStrength(password) {
+            let chars = 0;
+            let entropy = 0;
+            let strength = 0;
+            
+            if (password.match(/[a-z]/)) chars += 26;
+            if (password.match(/[A-Z]/)) chars += 26;
+            if (password.match(/[0-9]/)) chars += 10;
+            if (password.match(/[\W]/)) chars += 32;
+            
+            entropy = Math.log2(Math.pow(chars, password.length));
+            
+            if (entropy < 50) strength = 1;
+            if (entropy >= 50) strength = 2;
+            if (entropy >= 70) strength = 3;
+            if (entropy >= 90) strength = 4;
+            if (entropy >= 128) strength = 5;
+            
+            return strength;
+        }
+
+        function displayStrength(strength) {
+            const strengthLabels = ['Very Weak', 'Weak', 'Medium', 'Strong', 'Very Strong'];
+            const colors = ['#dc3545', '#ffc107', '#fd7e14', '#28a745', '#007bff'];
+            const strengthLabel = strengthLabels[strength - 1] || 'Very Weak';
+            const color = colors[strength - 1] || '#dc3545';
+            
+            $('#password-strength').text(`Password strength: ${strengthLabel}`).css('color', color);
+            $('#reset').prop('disabled', strength < 3);
+        }
+    });
+</script>
 {% endblock %}
