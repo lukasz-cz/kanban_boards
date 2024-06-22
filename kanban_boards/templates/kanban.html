@@ -16,22 +16,22 @@
             <tr>
                 <td id="backlog" class="task-column">
                     {% for i in user_tasks.backlog %}
-                        <div id="item_{{ loop.index }}" class="task-item px-2 py-4 mb-2 border rounded" data-content="{{ i }}">{{ i }} <button class="btn btn-danger btn-sm delete-btn float-end">-</button></div>
+                        <div id="item_{{ loop.index }}" class="task-item px-2 py-4 mb-2 border rounded" data-content="{{ i|e }}">{{ i|e }} <button class="btn btn-danger btn-sm delete-btn float-end">-</button></div>
                     {% endfor %}
                 </td>
                 <td id="waiting" class="task-column">
                     {% for i in user_tasks.waiting %}
-                        <div id="item_{{ loop.index }}" class="task-item px-2 py-4 mb-2 border rounded" data-content="{{ i }}">{{ i }} <button class="btn btn-danger btn-sm delete-btn float-end">-</button></div>
+                        <div id="item_{{ loop.index }}" class="task-item px-2 py-4 mb-2 border rounded" data-content="{{ i|e }}">{{ i|e }} <button class="btn btn-danger btn-sm delete-btn float-end">-</button></div>
                     {% endfor %}
                 </td>
                 <td id="working" class="task-column">
                     {% for i in user_tasks.working %}
-                        <div id="item_{{ loop.index }}" class="task-item px-2 py-4 mb-2 border rounded" data-content="{{ i }}">{{ i }} <button class="btn btn-danger btn-sm delete-btn float-end">-</button></div>
+                        <div id="item_{{ loop.index }}" class="task-item px-2 py-4 mb-2 border rounded" data-content="{{ i|e }}">{{ i|e }} <button class="btn btn-danger btn-sm delete-btn float-end">-</button></div>
                     {% endfor %}
                 </td>
                 <td id="done" class="task-column">
                     {% for i in user_tasks.done %}
-                        <div id="item_{{ loop.index }}" class="task-item px-2 py-4 mb-2 border rounded" data-content="{{ i }}">{{ i }} <button class="btn btn-danger btn-sm delete-btn float-end">-</button></div>
+                        <div id="item_{{ loop.index }}" class="task-item px-2 py-4 mb-2 border rounded" data-content="{{ i|e }}">{{ i|e }} <button class="btn btn-danger btn-sm delete-btn float-end">-</button></div>
                     {% endfor %}
                 </td>
             </tr>
@@ -83,10 +83,24 @@
                 updateTasks();
             }
         }).disableSelection();
+        
+		var tagsToReplace = {
+			'&': '&amp;',
+			'<': '&lt;',
+			'>': '&gt;'
+		};
+
+		function replaceTag(tag) {
+			return tagsToReplace[tag] || tag;
+		}
+
+		function safeTagsReplace(str) {
+			return str.replace(/[&<>]/g, replaceTag);
+		}
 
         $('#add-item-form').on('submit', function(event) {
             event.preventDefault();
-            const itemName = $('#item-name').val().trim();
+            const itemName = safeTagsReplace($('#item-name').val().trim());
             const itemCategory = $('#item-category').val();
             if (itemName && itemCategory) {
                 itemCount++;
